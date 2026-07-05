@@ -1,6 +1,0 @@
-{
-  "name": "E-Learning Kampus",
-  "description": "Portal akademis interaktif untuk pembelajaran lingkungan yang mencakup modul Dosen, Mahasiswa, dan Administrator.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
