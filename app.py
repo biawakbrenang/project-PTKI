@@ -36,157 +36,6 @@ STATUS_COLOR = {
 
 
 # --------------------------------------------------------------------------
-# Theme / visual style (mengikuti tampilan referensi SIAKAD V2)
-# --------------------------------------------------------------------------
-def build_css(dark: bool) -> str:
-    if dark:
-        bg, sidebar_bg, card_bg = "#0f172a", "#111827", "#1e293b"
-        text, muted, border = "#e5e7eb", "#94a3b8", "#334155"
-        hover = "#1f2937"
-    else:
-        bg, sidebar_bg, card_bg = "#f6f8fb", "#ffffff", "#ffffff"
-        text, muted, border = "#111827", "#6b7280", "#e5e7eb"
-        hover = "#f3f4f6"
-
-    return f"""
-    <style>
-    html, body, [class*="css"] {{ font-family: 'Segoe UI', Inter, system-ui, sans-serif; }}
-    [data-testid="stAppViewContainer"] {{ background: {bg}; }}
-    [data-testid="stHeader"] {{ background: transparent; }}
-    [data-testid="stMainBlockContainer"] {{ padding-top: 1.5rem; max-width: 1180px; }}
-    h1, h2, h3, h4, p, span, label, div {{ color: {text}; }}
-
-    /* Sidebar */
-    section[data-testid="stSidebar"] {{
-        background: {sidebar_bg}; border-right: 1px solid {border};
-    }}
-    section[data-testid="stSidebar"] .stButton button {{
-        text-align: left; justify-content: flex-start; width: 100%;
-        border-radius: 10px; padding: 0.55rem 0.9rem; font-size: 0.95rem;
-        border: none !important; box-shadow: none !important; transition: background .15s;
-    }}
-    section[data-testid="stSidebar"] button[kind="primary"] {{
-        background: #eff6ff !important; color: #1d4ed8 !important; font-weight: 700 !important;
-    }}
-    section[data-testid="stSidebar"] button[kind="secondary"] {{
-        background: transparent !important; color: {muted} !important; font-weight: 500 !important;
-    }}
-    section[data-testid="stSidebar"] button:hover {{ background: {hover} !important; }}
-
-    /* Cards (bordered containers) */
-    div[data-testid="stVerticalBlockBorderWrapper"] {{
-        border-radius: 16px !important; border: 1px solid {border} !important;
-        background: {card_bg} !important; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    }}
-
-    /* Generic buttons */
-    .stButton button {{ border-radius: 10px; font-weight: 600; }}
-    div[data-testid="stMainBlockContainer"] .stButton button[kind="primary"] {{
-        background: #2563eb; border-color: #2563eb;
-    }}
-    div[data-testid="stMainBlockContainer"] .stButton button[kind="primary"]:hover {{
-        background: #1d4ed8; border-color: #1d4ed8;
-    }}
-    .stButton button p {{ white-space: pre-line; line-height: 1.3; }}
-
-    /* Pill-style radio (status kehadiran) */
-    div[role="radiogroup"] {{ gap: 0.4rem; }}
-    div[role="radiogroup"] label {{
-        border: 1px solid {border}; border-radius: 999px; padding: 0.25rem 0.85rem;
-        background: {card_bg};
-    }}
-    div[role="radiogroup"] label:has(input:checked) {{
-        background: #2563eb !important; border-color: #2563eb !important;
-    }}
-    div[role="radiogroup"] label:has(input:checked) p {{ color: white !important; font-weight: 700; }}
-    div[role="radiogroup"] input {{ display: none; }}
-
-    /* Progress bar -> green like screenshot */
-    div[data-testid="stProgress"] > div > div > div {{ background-color: #16a34a !important; }}
-
-    /* Top bar */
-    .page-title {{ font-size: 1.7rem; font-weight: 800; color: {text}; margin-bottom: 0; }}
-    .page-date {{ color: {muted}; font-size: 0.9rem; margin-top: -4px; }}
-
-    /* Stat card */
-    .stat-card {{
-        background: {card_bg}; border: 1px solid {border}; border-radius: 16px;
-        padding: 1.1rem 1.2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    }}
-    .stat-icon {{
-        width: 42px; height: 42px; border-radius: 10px; display: flex;
-        align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 0.6rem;
-    }}
-    .stat-label {{ color: {muted}; font-size: 0.88rem; }}
-    .stat-value {{ font-size: 1.7rem; font-weight: 800; color: {text}; }}
-
-    /* Avatar circle */
-    .avatar-circle {{
-        width: 38px; height: 38px; border-radius: 50%; background: #dbeafe; color: #1d4ed8;
-        display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;
-    }}
-
-    /* Login card */
-    .login-hero {{
-        background: linear-gradient(135deg, #2563eb, #0d9488); border-radius: 24px;
-        padding: 48px; color: white; height: 100%;
-    }}
-    .login-badge {{
-        display: inline-block; background: rgba(255,255,255,0.15); padding: 6px 16px;
-        border-radius: 999px; font-size: 0.85rem; font-weight: 600;
-    }}
-    </style>
-    """
-
-
-def inject_css():
-    st.markdown(build_css(st.session_state.get("dark", False)), unsafe_allow_html=True)
-
-
-def stat_card(icon, icon_bg, icon_color, label, value):
-    st.markdown(
-        f"""
-        <div class="stat-card">
-          <div class="stat-icon" style="background:{icon_bg};color:{icon_color};">{icon}</div>
-          <div class="stat-label">{label}</div>
-          <div class="stat-value">{value}</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-def avatar_circle(name, size=38):
-    initial = (name or "?").strip()[:1].upper()
-    return (
-        f'<div class="avatar-circle" style="width:{size}px;height:{size}px;'
-        f'font-size:{size*0.4}px;">{initial}</div>'
-    )
-
-
-def topbar(title):
-    c1, c2 = st.columns([3, 1])
-    with c1:
-        today_str = date.today().strftime("%d %B %Y")
-        st.markdown(
-            f'<div class="page-title">{title}</div><div class="page-date">{today_str}</div>',
-            unsafe_allow_html=True,
-        )
-    with c2:
-        b1, b2 = st.columns([1, 2.2])
-        with b1:
-            icon = "☀️" if st.session_state.get("dark") else "🌙"
-            if st.button(icon, key="theme_toggle"):
-                st.session_state.dark = not st.session_state.get("dark", False)
-                st.rerun()
-        with b2:
-            if st.button("Keluar", key="logout_top", use_container_width=True):
-                logout()
-                st.rerun()
-    st.write("")
-
-
-# --------------------------------------------------------------------------
 # Auth helpers
 # --------------------------------------------------------------------------
 def login(email: str, password: str) -> bool:
@@ -468,14 +317,17 @@ def student_delete_for_lecturer(id_mahasiswa, id_dosen):
 # Pages
 # --------------------------------------------------------------------------
 def page_login():
-    inject_css()
     left, right = st.columns([1.1, 0.9])
     with left:
         st.markdown(
             """
-            <div class="login-hero">
-              <div class="login-badge">🛡️ Sistem akademik dosen</div>
-              <h1 style="font-size:2.4rem;font-weight:900;margin-top:24px;line-height:1.2;color:white;">
+            <div style="background:linear-gradient(135deg,#2563eb,#1e3a8a);border-radius:24px;
+                        padding:48px;color:white;height:100%;">
+              <div style="display:inline-block;background:rgba(255,255,255,0.15);
+                          padding:6px 16px;border-radius:999px;font-size:0.85rem;font-weight:600;">
+                🛡️ Sistem akademik dosen
+              </div>
+              <h1 style="font-size:2.4rem;font-weight:900;margin-top:24px;line-height:1.2;">
                 Kelola absensi kelas dengan cepat dan rapi.
               </h1>
               <p style="margin-top:16px;color:#dbeafe;font-size:1.05rem;">
@@ -487,138 +339,97 @@ def page_login():
             unsafe_allow_html=True,
         )
     with right:
-        with st.container(border=True):
-            st.markdown(
-                '<div class="stat-icon" style="background:#2563eb;color:white;'
-                'width:56px;height:56px;font-size:1.6rem;border-radius:16px;">🎓</div>',
-                unsafe_allow_html=True,
-            )
-            st.markdown("### Masuk ke SIAKAD V2")
-            st.caption("Gunakan akun dosen untuk mengakses sistem.")
-            with st.form("login_form"):
-                email = st.text_input("Email", placeholder="firansyah@univ.ac.id")
-                password = st.text_input("Password", type="password", placeholder="Masukkan password")
-                submitted = st.form_submit_button("🔐 Masuk", use_container_width=True, type="primary")
-                if submitted:
-                    if login(email.strip(), password):
-                        st.session_state.page = "dashboard"
-                        st.rerun()
-                    else:
-                        st.error("Email atau password salah.")
+        st.markdown("### 🎓 Masuk ke SIAKAD V2")
+        st.caption("Gunakan akun dosen untuk mengakses sistem.")
+        with st.form("login_form"):
+            email = st.text_input("Email", placeholder="firansyah@univ.ac.id")
+            password = st.text_input("Password", type="password", placeholder="Masukkan password")
+            submitted = st.form_submit_button("Masuk", use_container_width=True, type="primary")
+            if submitted:
+                if login(email.strip(), password):
+                    st.session_state.page = "dashboard"
+                    st.rerun()
+                else:
+                    st.error("Email atau password salah.")
 
-            st.info("**Akun demo**\n\nEmail: firansyah@univ.ac.id\n\nPassword: password")
+        st.info("**Akun demo**\n\nEmail: firansyah@univ.ac.id\n\nPassword: password")
 
 
 def page_dashboard():
-    topbar("Dashboard")
-
-    name = st.session_state.user["nama_lengkap"].split(",")[0]
-    st.markdown(
-        f"""
-        <div style="background:linear-gradient(135deg,#2563eb,#0d9488);border-radius:20px;
-                    padding:32px 36px;color:white;margin-bottom:1.2rem;">
-          <div style="font-size:0.78rem;font-weight:700;letter-spacing:1px;color:#dbeafe;">
-            SELAMAT DATANG KEMBALI
-          </div>
-          <div style="font-size:1.9rem;font-weight:800;margin-top:4px;">{name}</div>
-          <div style="margin-top:10px;color:#e0f2fe;font-size:0.98rem;max-width:640px;">
-            Pantau jadwal, kelola presensi mahasiswa, dan cek kualitas kehadiran kelas dari satu dashboard.
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.markdown(f"## Selamat datang kembali, {st.session_state.user['nama_lengkap'].split(',')[0]} 👋")
+    st.caption("Pantau jadwal, kelola presensi mahasiswa, dan cek kualitas kehadiran kelas dari satu dashboard.")
 
     stats = get_dashboard_stats(current_dosen_id())
     c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        stat_card("📘", "#dbeafe", "#2563eb", "Mata Kuliah", stats["total_matkul"])
-    with c2:
-        stat_card("🎓", "#dcfce7", "#16a34a", "Mahasiswa", stats["total_mahasiswa"])
-    with c3:
-        stat_card("📅", "#ffedd5", "#ea580c", "Jadwal Kelas", stats["total_jadwal"])
-    with c4:
-        stat_card("📈", "#fee2e2", "#dc2626", "Rata Kehadiran", f"{stats['rata_kehadiran']}%")
+    c1.metric("📚 Mata Kuliah", stats["total_matkul"])
+    c2.metric("🎓 Mahasiswa", stats["total_mahasiswa"])
+    c3.metric("🗓️ Jadwal Kelas", stats["total_jadwal"])
+    c4.metric("📈 Rata Kehadiran", f"{stats['rata_kehadiran']}%")
 
-    st.write("")
-    col1, col2 = st.columns([1, 1.1])
+    st.divider()
+    col1, col2 = st.columns([1, 1])
     with col1:
-        with st.container(border=True):
-            st.markdown("#### Aksi Cepat")
-            st.caption("Masuk ke pekerjaan utama tanpa banyak klik.")
-            a, b, cc = st.columns(3)
-            with a:
-                if st.button("📋\nInput Absensi", use_container_width=True, key="quick_absensi"):
-                    st.session_state.page = "absensi"
-                    st.rerun()
-                st.caption("Catat kehadiran")
-            with b:
-                if st.button("📄\nLihat Rekap", use_container_width=True, key="quick_rekap"):
-                    st.session_state.page = "rekap"
-                    st.rerun()
-                st.caption("Monitor persentase")
-            with cc:
-                if st.button("👥\nMahasiswa", use_container_width=True, key="quick_mhs"):
-                    st.session_state.page = "mahasiswa"
-                    st.rerun()
-                st.caption("Kelola peserta")
+        st.markdown("#### Aksi Cepat")
+        st.caption("Masuk ke pekerjaan utama tanpa banyak klik.")
+        a, b, cc = st.columns(3)
+        if a.button("📋 Input Absensi", use_container_width=True):
+            st.session_state.page = "absensi"
+            st.rerun()
+        if b.button("📄 Lihat Rekap", use_container_width=True):
+            st.session_state.page = "rekap"
+            st.rerun()
+        if cc.button("👥 Mahasiswa", use_container_width=True):
+            st.session_state.page = "mahasiswa"
+            st.rerun()
 
     with col2:
-        with st.container(border=True):
-            st.markdown("#### Jadwal Terdekat")
-            st.caption("5 pertemuan berikutnya di sistem.")
-            schedules = get_upcoming_schedules(current_dosen_id())
-            if not schedules:
-                st.info("Belum ada jadwal perkuliahan.")
-            for s in schedules:
-                with st.container(border=True):
-                    sc1, sc2 = st.columns([2, 1])
-                    sc1.markdown(f"**{s['nama_matkul']}**  \n{s['kode_matkul']} - Pertemuan {s['pertemuan_ke']}")
-                    try:
-                        tanggal = datetime.strptime(s["tanggal_pertemuan"], "%Y-%m-%d").strftime("%d %b %Y")
-                    except ValueError:
-                        tanggal = s["tanggal_pertemuan"]
-                    sc2.markdown(
-                        f"<div style='text-align:right'><b>{tanggal}</b><br>"
-                        f"{s['jam_mulai']} - {s['jam_selesai']}</div>",
-                        unsafe_allow_html=True,
-                    )
+        st.markdown("#### Jadwal Terdekat")
+        st.caption("5 pertemuan berikutnya di sistem.")
+        schedules = get_upcoming_schedules(current_dosen_id())
+        if not schedules:
+            st.info("Belum ada jadwal perkuliahan.")
+        for s in schedules:
+            with st.container(border=True):
+                sc1, sc2 = st.columns([2, 1])
+                sc1.markdown(f"**{s['nama_matkul']}**  \n{s['kode_matkul']} - Pertemuan {s['pertemuan_ke']}")
+                try:
+                    tanggal = datetime.strptime(s["tanggal_pertemuan"], "%Y-%m-%d").strftime("%d %b %Y")
+                except ValueError:
+                    tanggal = s["tanggal_pertemuan"]
+                sc2.markdown(
+                    f"<div style='text-align:right'><b>{tanggal}</b><br>"
+                    f"{s['jam_mulai']} - {s['jam_selesai']}</div>",
+                    unsafe_allow_html=True,
+                )
 
 
 def page_absensi():
-    topbar("Input Absensi")
-
+    st.markdown("## 📋 Input Absensi")
     courses = get_courses_by_dosen(current_dosen_id())
     if not courses:
         st.info("Belum ada mata kuliah yang diampu.")
         return
 
-    with st.container(border=True):
-        course_options = {f"{c['kode_matkul']} - {c['nama_matkul']}": c["id_matkul"] for c in courses}
-        col1, col2, col3 = st.columns([2, 2, 1])
-        course_label = col1.selectbox("Mata Kuliah", ["Pilih mata kuliah"] + list(course_options.keys()))
+    course_options = {f"{c['kode_matkul']} - {c['nama_matkul']}": c["id_matkul"] for c in courses}
+    col1, col2 = st.columns(2)
+    course_label = col1.selectbox("Mata Kuliah", ["Pilih mata kuliah"] + list(course_options.keys()))
 
-        if course_label == "Pilih mata kuliah":
-            st.info("Pilih mata kuliah dan pertemuan untuk mulai input absensi.")
-            return
+    if course_label == "Pilih mata kuliah":
+        st.info("Pilih mata kuliah dan pertemuan untuk mulai input absensi.")
+        return
 
-        id_matkul = course_options[course_label]
-        schedules = get_schedules_by_course(id_matkul)
-        schedule_options = {}
-        for s in schedules:
-            try:
-                tanggal = datetime.strptime(s["tanggal_pertemuan"], "%Y-%m-%d").strftime("%d %b %Y")
-            except ValueError:
-                tanggal = s["tanggal_pertemuan"]
-            label = f"Pertemuan {s['pertemuan_ke']} - {tanggal}, {s['jam_mulai']}"
-            schedule_options[label] = s
+    id_matkul = course_options[course_label]
+    schedules = get_schedules_by_course(id_matkul)
+    schedule_options = {}
+    for s in schedules:
+        try:
+            tanggal = datetime.strptime(s["tanggal_pertemuan"], "%Y-%m-%d").strftime("%d %b %Y")
+        except ValueError:
+            tanggal = s["tanggal_pertemuan"]
+        label = f"Pertemuan {s['pertemuan_ke']} - {tanggal}, {s['jam_mulai']}"
+        schedule_options[label] = s
 
-        schedule_label = col2.selectbox("Pertemuan", ["Pilih jadwal"] + list(schedule_options.keys()))
-        with col3:
-            st.write("")
-            st.write("")
-            if st.button("↺ Reset", use_container_width=True):
-                st.rerun()
+    schedule_label = col2.selectbox("Pertemuan", ["Pilih jadwal"] + list(schedule_options.keys()))
 
     if schedule_label == "Pilih jadwal":
         st.info("Pilih pertemuan untuk menampilkan daftar mahasiswa.")
@@ -628,12 +439,9 @@ def page_absensi():
     id_jadwal = selected_schedule["id_jadwal"]
 
     m1, m2, m3 = st.columns(3)
-    with m1:
-        stat_card("📘", "#eef2ff", "#4f46e5", "Mata kuliah", course_label.split(" - ")[1])
-    with m2:
-        stat_card("🔢", "#eef2ff", "#4f46e5", "Pertemuan", selected_schedule["pertemuan_ke"])
-    with m3:
-        stat_card("📍", "#eef2ff", "#4f46e5", "Ruangan", selected_schedule["ruangan"])
+    m1.metric("Mata kuliah", course_label.split(" - ")[1])
+    m2.metric("Pertemuan", selected_schedule["pertemuan_ke"])
+    m3.metric("Ruangan", selected_schedule["ruangan"])
 
     students = get_students_by_course(id_matkul)
     if not students:
@@ -642,23 +450,21 @@ def page_absensi():
 
     attendance_rows = get_attendance_by_schedule(id_jadwal)
 
-    st.write("")
-    with st.container(border=True):
-        h1, h2 = st.columns([3, 1])
-        h1.markdown(f"#### Daftar Kehadiran\n{len(students)} mahasiswa terdaftar.")
-        with h2:
-            mark_all = st.button("✅ Tandai Hadir Semua", use_container_width=True)
+    st.markdown(f"**Daftar Kehadiran** — {len(students)} mahasiswa terdaftar.")
 
-        with st.form("form_absensi"):
-            status_values = {}
-            note_values = {}
-            for student in students:
-                sid = student["id_mahasiswa"]
-                current = attendance_rows.get(sid, {}).get("status_kehadiran", "Hadir")
-                current_note = attendance_rows.get(sid, {}).get("keterangan", "") or ""
-                if mark_all:
-                    current = "Hadir"
+    mark_all = st.button("✅ Tandai Hadir Semua")
 
+    with st.form("form_absensi"):
+        status_values = {}
+        note_values = {}
+        for student in students:
+            sid = student["id_mahasiswa"]
+            current = attendance_rows.get(sid, {}).get("status_kehadiran", "Hadir")
+            current_note = attendance_rows.get(sid, {}).get("keterangan", "") or ""
+            if mark_all:
+                current = "Hadir"
+
+            with st.container(border=True):
                 c1, c2, c3 = st.columns([2, 2, 2])
                 c1.markdown(f"**{student['nama_mahasiswa']}**  \n"
                             f"<span style='color:gray;font-size:0.85em'>{student['npm']} - {student['program_studi']}</span>",
@@ -675,33 +481,24 @@ def page_absensi():
                     "Keterangan", value=current_note, key=f"note_{id_jadwal}_{sid}",
                     placeholder="Catatan opsional", label_visibility="collapsed",
                 )
-                st.divider()
 
-            submitted = st.form_submit_button("💾 Simpan Absensi", type="primary")
-            if submitted:
-                for sid, status in status_values.items():
-                    save_attendance(sid, id_jadwal, status, note_values[sid].strip())
-                st.success("Absensi berhasil disimpan.")
-                st.rerun()
+        submitted = st.form_submit_button("💾 Simpan Absensi", type="primary")
+        if submitted:
+            for sid, status in status_values.items():
+                save_attendance(sid, id_jadwal, status, note_values[sid].strip())
+            st.success("Absensi berhasil disimpan.")
+            st.rerun()
 
 
 def page_rekap():
-    topbar("Rekap Absensi")
-
+    st.markdown("## 📄 Rekap Kehadiran")
     courses = get_courses_by_dosen(current_dosen_id())
     if not courses:
         st.info("Belum ada mata kuliah yang diampu.")
         return
 
-    with st.container(border=True):
-        col1, col2 = st.columns([3, 1])
-        course_options = {f"{c['kode_matkul']} - {c['nama_matkul']}": c["id_matkul"] for c in courses}
-        course_label = col1.selectbox("Filter Mata Kuliah", ["Pilih mata kuliah"] + list(course_options.keys()))
-        with col2:
-            st.write("")
-            st.write("")
-            if st.button("🖨️ Cetak", use_container_width=True):
-                st.toast("Fitur cetak akan tersedia pada versi mendatang.")
+    course_options = {f"{c['kode_matkul']} - {c['nama_matkul']}": c["id_matkul"] for c in courses}
+    course_label = st.selectbox("Filter Mata Kuliah", ["Pilih mata kuliah"] + list(course_options.keys()))
 
     if course_label == "Pilih mata kuliah":
         st.info("Pilih mata kuliah untuk melihat rekapitulasi.")
@@ -710,46 +507,40 @@ def page_rekap():
     id_matkul = course_options[course_label]
     summary = get_course_summary(id_matkul)
     c1, c2, c3 = st.columns(3)
-    with c1:
-        stat_card("🎓", "#dbeafe", "#2563eb", "Mahasiswa", summary["total_mahasiswa"] or 0)
-    with c2:
-        stat_card("📅", "#dcfce7", "#16a34a", "Total Jadwal", summary["total_jadwal"] or 0)
-    with c3:
-        stat_card("✅", "#ffedd5", "#ea580c", "Data Terisi", summary["total_absensi"] or 0)
+    c1.metric("Mahasiswa", summary["total_mahasiswa"] or 0)
+    c2.metric("Total Jadwal", summary["total_jadwal"] or 0)
+    c3.metric("Data Terisi", summary["total_absensi"] or 0)
 
     recap = get_attendance_recap(id_matkul)
     if not recap:
         st.info("Belum ada mahasiswa atau data absensi untuk mata kuliah ini.")
         return
 
-    st.write("")
-    with st.container(border=True):
-        nama_matkul = course_label.split(" - ")[1]
-        st.markdown(f"#### Rekap {nama_matkul}")
-        st.caption("Persentase dihitung dari status Hadir dan Terlambat terhadap total jadwal.")
+    st.caption("Persentase dihitung dari status Hadir dan Terlambat terhadap total jadwal.")
 
-        header_cols = st.columns([3, 1, 1, 1, 1, 1, 2])
-        for col, label in zip(header_cols, ["Mahasiswa", "Hadir", "Terlambat", "Sakit", "Izin", "Alpa", "Persentase"]):
-            col.markdown(f"<span style='color:gray;font-size:0.8em;font-weight:700;letter-spacing:0.5px;'>{label.upper()}</span>", unsafe_allow_html=True)
+    header_cols = st.columns([3, 1, 1, 1, 1, 1, 2])
+    for col, label in zip(header_cols, ["Mahasiswa", "Hadir", "Terlambat", "Sakit", "Izin", "Alpa", "Persentase"]):
+        col.markdown(f"**{label}**")
 
-        for row in recap:
-            total = max(row["total_jadwal"] or 0, 1)
-            present = (row["hadir"] or 0) + (row["terlambat"] or 0)
-            percentage = min(100, round(present / total * 100))
+    for row in recap:
+        total = max(row["total_jadwal"] or 0, 1)
+        present = (row["hadir"] or 0) + (row["terlambat"] or 0)
+        percentage = min(100, round(present / total * 100))
+        good = percentage >= 75
 
-            cols = st.columns([3, 1, 1, 1, 1, 1, 2])
-            cols[0].markdown(f"**{row['nama_mahasiswa']}**  \n<span style='color:gray;font-size:0.85em'>{row['npm']}</span>", unsafe_allow_html=True)
-            cols[1].markdown(f":green[**{row['hadir'] or 0}**]")
-            cols[2].markdown(f":blue[**{row['terlambat'] or 0}**]")
-            cols[3].markdown(f":orange[**{row['sakit'] or 0}**]")
-            cols[4].markdown(f":violet[**{row['izin'] or 0}**]")
-            cols[5].markdown(f":red[**{row['alpa'] or 0}**]")
-            with cols[6]:
-                st.progress(percentage / 100, text=f"{percentage}%")
+        cols = st.columns([3, 1, 1, 1, 1, 1, 2])
+        cols[0].markdown(f"**{row['nama_mahasiswa']}**  \n<span style='color:gray;font-size:0.85em'>{row['npm']}</span>", unsafe_allow_html=True)
+        cols[1].markdown(f":green[**{row['hadir'] or 0}**]")
+        cols[2].markdown(f":blue[**{row['terlambat'] or 0}**]")
+        cols[3].markdown(f":orange[**{row['sakit'] or 0}**]")
+        cols[4].markdown(f":violet[**{row['izin'] or 0}**]")
+        cols[5].markdown(f":red[**{row['alpa'] or 0}**]")
+        with cols[6]:
+            st.progress(percentage / 100, text=f"{percentage}%")
 
 
 def page_mahasiswa():
-    topbar("Data Mahasiswa")
+    st.markdown("## 👥 Data Mahasiswa")
     id_dosen = current_dosen_id()
     courses = get_courses_by_dosen(id_dosen)
 
@@ -757,7 +548,7 @@ def page_mahasiswa():
 
     editing = st.session_state.get("editing_student")
 
-    with col_form, st.container(border=True):
+    with col_form:
         st.markdown(f"#### {'Edit Mahasiswa' if editing else 'Tambah Mahasiswa'}")
         st.caption("Mahasiswa baru otomatis masuk ke mata kuliah yang dipilih.")
 
@@ -814,20 +605,16 @@ def page_mahasiswa():
                 st.rerun()
 
     with col_list:
-        s1, s2 = st.columns([3, 1])
-        keyword = s1.text_input("🔍 Cari NPM, nama, atau program studi", value=st.session_state.get("mhs_keyword", ""), label_visibility="collapsed", placeholder="Cari NPM, nama, atau program studi")
+        keyword = st.text_input("🔍 Cari NPM, nama, atau program studi", value=st.session_state.get("mhs_keyword", ""))
         st.session_state.mhs_keyword = keyword
-        s2.button("Cari", use_container_width=True)
 
         students = student_get_by_lecturer(id_dosen, keyword.strip())
+        st.markdown(f"#### Daftar Mahasiswa")
+        st.caption(f"{len(students)} mahasiswa ditemukan.")
 
-        with st.container(border=True):
-            st.markdown(f"#### Daftar Mahasiswa")
-            st.caption(f"{len(students)} mahasiswa ditemukan.")
-
-            for student in students:
-                c0, c1, c2, c3, c4 = st.columns([0.4, 2.6, 2, 1, 1.4])
-                c0.markdown(avatar_circle(student["nama_mahasiswa"]), unsafe_allow_html=True)
+        for student in students:
+            with st.container(border=True):
+                c1, c2, c3, c4 = st.columns([3, 2, 1, 1.4])
                 c1.markdown(
                     f"**{student['nama_mahasiswa']}**  \n"
                     f"<span style='color:gray;font-size:0.85em'>{student['npm']}"
@@ -873,50 +660,26 @@ def main():
         page_login()
         return
 
-    inject_css()
-
     with st.sidebar:
-        st.markdown(
-            """
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.6rem;">
-              <div style="background:#2563eb;color:white;width:40px;height:40px;border-radius:10px;
-                          display:flex;align-items:center;justify-content:center;font-size:1.3rem;">🎓</div>
-              <div>
-                <div style="font-weight:800;font-size:1.05rem;line-height:1.1;">SIAKAD V2</div>
-                <div style="color:#9ca3af;font-size:0.72rem;letter-spacing:0.5px;">ABSENSI DOSEN</div>
-              </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        st.markdown("### 🎓 SIAKAD V2")
+        st.caption(f"Login sebagai:\n\n**{st.session_state.user['nama_lengkap']}**")
         st.divider()
 
         nav = {
-            "dashboard": "🏠  Dashboard",
-            "absensi": "📋  Input Absensi",
-            "rekap": "📄  Rekap Absensi",
-            "mahasiswa": "👥  Mahasiswa",
+            "dashboard": "🏠 Dashboard",
+            "absensi": "📋 Input Absensi",
+            "mahasiswa": "👥 Mahasiswa",
+            "rekap": "📄 Rekap",
         }
         for key, label in nav.items():
             if st.button(label, use_container_width=True, type="primary" if st.session_state.page == key else "secondary"):
                 st.session_state.page = key
                 st.rerun()
 
-        st.markdown("<div style='flex-grow:1'></div>", unsafe_allow_html=True)
-        st.write("")
-        st.write("")
-        with st.container(border=True):
-            uc1, uc2, uc3 = st.columns([0.8, 3, 0.8])
-            nama = st.session_state.user["nama_lengkap"]
-            uc1.markdown(avatar_circle(nama, size=34), unsafe_allow_html=True)
-            uc2.markdown(
-                f"<div style='font-weight:700;font-size:0.9rem;line-height:1.2;'>{nama}</div>"
-                f"<div style='color:#9ca3af;font-size:0.78rem;'>{st.session_state.user['nidn']}</div>",
-                unsafe_allow_html=True,
-            )
-            if uc3.button("⏻", key="logout_sidebar", help="Keluar"):
-                logout()
-                st.rerun()
+        st.divider()
+        if st.button("🚪 Logout", use_container_width=True):
+            logout()
+            st.rerun()
 
     pages = {
         "dashboard": page_dashboard,
