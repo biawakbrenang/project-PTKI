@@ -34,6 +34,22 @@ STATUS_COLOR = {
     "Alpa": "🔴",
 }
 
+# Palet warna badge status (bg, fg)
+STATUS_BADGE = {
+    "Hadir": ("#DCFCE7", "#15803D"),
+    "Terlambat": ("#DBEAFE", "#1D4ED8"),
+    "Sakit": ("#FEF3C7", "#B45309"),
+    "Izin": ("#EDE9FE", "#6D28D9"),
+    "Alpa": ("#FEE2E2", "#B91C1C"),
+}
+
+NAV_ITEMS = [
+    ("dashboard", "🏠", "Dashboard"),
+    ("absensi", "📋", "Input Absensi"),
+    ("mahasiswa", "👥", "Mahasiswa"),
+    ("rekap", "📄", "Rekap"),
+]
+
 
 # --------------------------------------------------------------------------
 # Auth helpers
@@ -75,6 +91,167 @@ def show_flash():
     if "flash" in st.session_state:
         kind, message = st.session_state.pop("flash")
         getattr(st, kind if kind in ("success", "error", "info", "warning") else "info")(message)
+
+
+# --------------------------------------------------------------------------
+# UI helpers (tema visual)
+# --------------------------------------------------------------------------
+def inject_css():
+    st.markdown(
+        """
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+        html, body, [class*="css"] { font-family: 'Source Sans Pro', sans-serif; }
+        h1, h2, h3, h4, .page-header h2 { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        .stApp { background: #F3F5F9; }
+        #MainMenu, footer, header[data-testid="stHeader"] { visibility: hidden; height: 0; }
+        .block-container { padding-top: 1.6rem; padding-bottom: 3rem; max-width: 1200px; }
+
+        /* Sidebar */
+        section[data-testid="stSidebar"] {
+            background: linear-gradient(180deg, #0F172A 0%, #111827 100%);
+        }
+        section[data-testid="stSidebar"] * { color: #E5E7EB !important; }
+        section[data-testid="stSidebar"] hr { border-color: #ffffff22; }
+
+        section[data-testid="stSidebar"] button {
+            border-radius: 10px !important;
+            border: 1px solid transparent !important;
+            text-align: left !important;
+            justify-content: flex-start !important;
+            font-weight: 600 !important;
+            padding: 0.55rem 0.9rem !important;
+            margin-bottom: 2px;
+        }
+        section[data-testid="stSidebar"] button[kind="secondary"] {
+            background: transparent !important;
+            color: #CBD5E1 !important;
+        }
+        section[data-testid="stSidebar"] button[kind="secondary"]:hover {
+            background: #ffffff14 !important;
+            border-color: #ffffff22 !important;
+        }
+        section[data-testid="stSidebar"] button[kind="primary"] {
+            background: #2563EB !important;
+            box-shadow: 0 4px 10px rgba(37,99,235,0.35);
+        }
+
+        .sidebar-brand {
+            display:flex; align-items:center; gap:10px; margin-bottom: 4px;
+        }
+        .sidebar-brand .logo {
+            width:38px; height:38px; border-radius:10px;
+            background:linear-gradient(135deg,#3B82F6,#1E3A8A);
+            display:flex; align-items:center; justify-content:center; font-size:1.1rem;
+        }
+        .sidebar-brand .title { font-weight:800; font-size:1.05rem; }
+        .sidebar-user {
+            display:flex; align-items:center; gap:10px;
+            background:#ffffff0d; border:1px solid #ffffff1a;
+            border-radius:12px; padding:10px 12px; margin: 10px 0 6px 0;
+        }
+        .sidebar-user .avatar {
+            width:34px; height:34px; border-radius:50%; background:#2563EB;
+            display:flex; align-items:center; justify-content:center;
+            font-weight:700; font-size:0.85rem; color:white; flex-shrink:0;
+        }
+        .sidebar-user .meta { line-height:1.2; overflow:hidden; }
+        .sidebar-user .meta .name { font-weight:700; font-size:0.85rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .sidebar-user .meta .role { font-size:0.72rem; color:#94A3B8 !important; }
+
+        /* Page header */
+        .page-header h2 { margin-bottom:2px; font-weight:800; color:#0F172A; }
+        .page-header p { margin-top:0; color:#64748B; font-size:0.95rem; }
+
+        /* KPI cards */
+        .kpi-card {
+            background:white; border:1px solid #E7EAF0; border-radius:16px;
+            padding:18px 18px; display:flex; align-items:center; gap:14px;
+            box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+            height:100%;
+        }
+        .kpi-card .icon {
+            width:44px; height:44px; border-radius:12px;
+            display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0;
+        }
+        .kpi-card .value { font-size:1.5rem; font-weight:800; color:#0F172A; line-height:1.1; }
+        .kpi-card .label { font-size:0.8rem; color:#64748B; font-weight:600; }
+
+        /* Generic white card */
+        div[data-testid="stVerticalBlockBorderWrapper"] {
+            border-radius: 16px !important;
+            border: 1px solid #E7EAF0 !important;
+            box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+        }
+        div[data-testid="stForm"] {
+            border-radius: 16px !important;
+            border: 1px solid #E7EAF0 !important;
+            background: white;
+            padding: 1.4rem 1.4rem 0.6rem 1.4rem !important;
+            box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+        }
+
+        /* Buttons in main area */
+        .main .stButton button, .block-container .stButton button {
+            border-radius: 10px !important;
+            font-weight: 600 !important;
+        }
+        .main button[kind="primary"], .block-container button[kind="primary"] {
+            background: #2563EB !important; border-color:#2563EB !important;
+        }
+
+        /* Badges */
+        .badge {
+            display:inline-block; padding:3px 12px; border-radius:999px;
+            font-size:0.78rem; font-weight:700;
+        }
+
+        /* Text inputs */
+        .stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"] {
+            border-radius:10px !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_header(title: str, subtitle: str = ""):
+    st.markdown(
+        f"""<div class="page-header"><h2>{title}</h2>{f'<p>{subtitle}</p>' if subtitle else ''}</div>""",
+        unsafe_allow_html=True,
+    )
+
+
+def kpi_card(icon, label, value, bg="#EFF6FF", fg="#2563EB"):
+    st.markdown(
+        f"""
+        <div class="kpi-card">
+            <div class="icon" style="background:{bg};color:{fg};">{icon}</div>
+            <div>
+                <div class="value">{value}</div>
+                <div class="label">{label}</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def status_badge(status: str) -> str:
+    bg, fg = STATUS_BADGE.get(status, ("#F1F5F9", "#334155"))
+    return f'<span class="badge" style="background:{bg};color:{fg};">{status}</span>'
+
+
+def initials(name: str) -> str:
+    parts = [p for p in name.replace(",", " ").split() if p.isalpha()]
+    if not parts:
+        return "?"
+    if len(parts) == 1:
+        return parts[0][:2].upper()
+    return (parts[0][0] + parts[1][0]).upper()
 
 
 # --------------------------------------------------------------------------
@@ -317,7 +494,9 @@ def student_delete_for_lecturer(id_mahasiswa, id_dosen):
 # Pages
 # --------------------------------------------------------------------------
 def page_login():
-    left, right = st.columns([1.1, 0.9])
+    inject_css()
+    st.markdown("<div style='height:2.2rem'></div>", unsafe_allow_html=True)
+    left, right = st.columns([1.15, 0.85], gap="large")
     with left:
         st.markdown(
             """
@@ -334,42 +513,63 @@ def page_login():
                 Dashboard, input kehadiran, data mahasiswa, dan rekap perkuliahan
                 sudah terhubung dalam satu alur kerja.
               </p>
+              <div style="margin-top:36px;display:flex;gap:28px;">
+                <div><div style="font-size:1.4rem;font-weight:800;">100%</div>
+                  <div style="color:#bfdbfe;font-size:0.8rem;">Tersimpan di database</div></div>
+                <div><div style="font-size:1.4rem;font-weight:800;">Real-time</div>
+                  <div style="color:#bfdbfe;font-size:0.8rem;">Update rekap otomatis</div></div>
+              </div>
             </div>
             """,
             unsafe_allow_html=True,
         )
     with right:
-        st.markdown("### 🎓 Masuk ke SIAKAD V2")
-        st.caption("Gunakan akun dosen untuk mengakses sistem.")
-        with st.form("login_form"):
-            email = st.text_input("Email", placeholder="firansyah@univ.ac.id")
-            password = st.text_input("Password", type="password", placeholder="Masukkan password")
-            submitted = st.form_submit_button("Masuk", use_container_width=True, type="primary")
-            if submitted:
-                if login(email.strip(), password):
-                    st.session_state.page = "dashboard"
-                    st.rerun()
-                else:
-                    st.error("Email atau password salah.")
+        with st.container(border=True):
+            st.markdown(
+                """<div class="sidebar-brand" style="margin-bottom:6px;">
+                    <div class="logo" style="background:linear-gradient(135deg,#3B82F6,#1E3A8A);">🎓</div>
+                    <div class="title" style="color:#0F172A;font-size:1.15rem;">Masuk ke SIAKAD V2</div>
+                </div>""",
+                unsafe_allow_html=True,
+            )
+            st.caption("Gunakan akun dosen untuk mengakses sistem.")
+            with st.form("login_form"):
+                email = st.text_input("Email", placeholder="firansyah@univ.ac.id")
+                password = st.text_input("Password", type="password", placeholder="Masukkan password")
+                submitted = st.form_submit_button("Masuk", use_container_width=True, type="primary")
+                if submitted:
+                    if login(email.strip(), password):
+                        st.session_state.page = "dashboard"
+                        st.rerun()
+                    else:
+                        st.error("Email atau password salah.")
 
-        st.info("**Akun demo**\n\nEmail: firansyah@univ.ac.id\n\nPassword: password")
+            st.info("**Akun demo**\n\nEmail: firansyah@univ.ac.id\n\nPassword: password")
 
 
 def page_dashboard():
-    st.markdown(f"## Selamat datang kembali, {st.session_state.user['nama_lengkap'].split(',')[0]} 👋")
-    st.caption("Pantau jadwal, kelola presensi mahasiswa, dan cek kualitas kehadiran kelas dari satu dashboard.")
+    nama_depan = st.session_state.user['nama_lengkap'].split(',')[0]
+    render_header(
+        f"Selamat datang kembali, {nama_depan} 👋",
+        "Pantau jadwal, kelola presensi mahasiswa, dan cek kualitas kehadiran kelas dari satu dashboard.",
+    )
 
     stats = get_dashboard_stats(current_dosen_id())
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("📚 Mata Kuliah", stats["total_matkul"])
-    c2.metric("🎓 Mahasiswa", stats["total_mahasiswa"])
-    c3.metric("🗓️ Jadwal Kelas", stats["total_jadwal"])
-    c4.metric("📈 Rata Kehadiran", f"{stats['rata_kehadiran']}%")
+    with c1:
+        kpi_card("📚", "Mata Kuliah", stats["total_matkul"], "#EFF6FF", "#2563EB")
+    with c2:
+        kpi_card("🎓", "Mahasiswa", stats["total_mahasiswa"], "#ECFDF5", "#059669")
+    with c3:
+        kpi_card("🗓️", "Jadwal Kelas", stats["total_jadwal"], "#FEF3C7", "#B45309")
+    with c4:
+        kpi_card("📈", "Rata Kehadiran", f"{stats['rata_kehadiran']}%", "#EDE9FE", "#6D28D9")
 
+    st.write("")
     st.divider()
     col1, col2 = st.columns([1, 1])
     with col1:
-        st.markdown("#### Aksi Cepat")
+        st.markdown("#### ⚡ Aksi Cepat")
         st.caption("Masuk ke pekerjaan utama tanpa banyak klik.")
         a, b, cc = st.columns(3)
         if a.button("📋 Input Absensi", use_container_width=True):
@@ -383,7 +583,7 @@ def page_dashboard():
             st.rerun()
 
     with col2:
-        st.markdown("#### Jadwal Terdekat")
+        st.markdown("#### 🗓️ Jadwal Terdekat")
         st.caption("5 pertemuan berikutnya di sistem.")
         schedules = get_upcoming_schedules(current_dosen_id())
         if not schedules:
@@ -391,20 +591,22 @@ def page_dashboard():
         for s in schedules:
             with st.container(border=True):
                 sc1, sc2 = st.columns([2, 1])
-                sc1.markdown(f"**{s['nama_matkul']}**  \n{s['kode_matkul']} - Pertemuan {s['pertemuan_ke']}")
+                sc1.markdown(f"**{s['nama_matkul']}**  \n"
+                             f"<span style='color:#64748B;font-size:0.85em'>{s['kode_matkul']} · Pertemuan {s['pertemuan_ke']}</span>",
+                             unsafe_allow_html=True)
                 try:
                     tanggal = datetime.strptime(s["tanggal_pertemuan"], "%Y-%m-%d").strftime("%d %b %Y")
                 except ValueError:
                     tanggal = s["tanggal_pertemuan"]
                 sc2.markdown(
                     f"<div style='text-align:right'><b>{tanggal}</b><br>"
-                    f"{s['jam_mulai']} - {s['jam_selesai']}</div>",
+                    f"<span style='color:#64748B'>{s['jam_mulai']} - {s['jam_selesai']}</span></div>",
                     unsafe_allow_html=True,
                 )
 
 
 def page_absensi():
-    st.markdown("## 📋 Input Absensi")
+    render_header("📋 Input Absensi", "Catat kehadiran mahasiswa per pertemuan, tersimpan langsung ke database.")
     courses = get_courses_by_dosen(current_dosen_id())
     if not courses:
         st.info("Belum ada mata kuliah yang diampu.")
@@ -439,9 +641,13 @@ def page_absensi():
     id_jadwal = selected_schedule["id_jadwal"]
 
     m1, m2, m3 = st.columns(3)
-    m1.metric("Mata kuliah", course_label.split(" - ")[1])
-    m2.metric("Pertemuan", selected_schedule["pertemuan_ke"])
-    m3.metric("Ruangan", selected_schedule["ruangan"])
+    with m1:
+        kpi_card("📚", "Mata Kuliah", course_label.split(" - ")[1], "#EFF6FF", "#2563EB")
+    with m2:
+        kpi_card("🔢", "Pertemuan", selected_schedule["pertemuan_ke"], "#ECFDF5", "#059669")
+    with m3:
+        kpi_card("🏫", "Ruangan", selected_schedule["ruangan"], "#FEF3C7", "#B45309")
+    st.write("")
 
     students = get_students_by_course(id_matkul)
     if not students:
@@ -491,7 +697,7 @@ def page_absensi():
 
 
 def page_rekap():
-    st.markdown("## 📄 Rekap Kehadiran")
+    render_header("📄 Rekap Kehadiran", "Rekapitulasi kehadiran mahasiswa per mata kuliah, dihitung langsung dari database.")
     courses = get_courses_by_dosen(current_dosen_id())
     if not courses:
         st.info("Belum ada mata kuliah yang diampu.")
@@ -507,9 +713,13 @@ def page_rekap():
     id_matkul = course_options[course_label]
     summary = get_course_summary(id_matkul)
     c1, c2, c3 = st.columns(3)
-    c1.metric("Mahasiswa", summary["total_mahasiswa"] or 0)
-    c2.metric("Total Jadwal", summary["total_jadwal"] or 0)
-    c3.metric("Data Terisi", summary["total_absensi"] or 0)
+    with c1:
+        kpi_card("🎓", "Mahasiswa", summary["total_mahasiswa"] or 0, "#EFF6FF", "#2563EB")
+    with c2:
+        kpi_card("🗓️", "Total Jadwal", summary["total_jadwal"] or 0, "#FEF3C7", "#B45309")
+    with c3:
+        kpi_card("✅", "Data Terisi", summary["total_absensi"] or 0, "#ECFDF5", "#059669")
+    st.write("")
 
     recap = get_attendance_recap(id_matkul)
     if not recap:
@@ -518,29 +728,33 @@ def page_rekap():
 
     st.caption("Persentase dihitung dari status Hadir dan Terlambat terhadap total jadwal.")
 
-    header_cols = st.columns([3, 1, 1, 1, 1, 1, 2])
-    for col, label in zip(header_cols, ["Mahasiswa", "Hadir", "Terlambat", "Sakit", "Izin", "Alpa", "Persentase"]):
-        col.markdown(f"**{label}**")
+    with st.container(border=True):
+        header_cols = st.columns([3, 1, 1, 1, 1, 1, 2])
+        for col, label in zip(header_cols, ["Mahasiswa", "Hadir", "Terlambat", "Sakit", "Izin", "Alpa", "Persentase"]):
+            col.markdown(f"**{label}**")
+        st.markdown("<hr style='margin:4px 0 10px 0;border-color:#E7EAF0'>", unsafe_allow_html=True)
 
-    for row in recap:
-        total = max(row["total_jadwal"] or 0, 1)
-        present = (row["hadir"] or 0) + (row["terlambat"] or 0)
-        percentage = min(100, round(present / total * 100))
-        good = percentage >= 75
+        for row in recap:
+            total = max(row["total_jadwal"] or 0, 1)
+            present = (row["hadir"] or 0) + (row["terlambat"] or 0)
+            percentage = min(100, round(present / total * 100))
 
-        cols = st.columns([3, 1, 1, 1, 1, 1, 2])
-        cols[0].markdown(f"**{row['nama_mahasiswa']}**  \n<span style='color:gray;font-size:0.85em'>{row['npm']}</span>", unsafe_allow_html=True)
-        cols[1].markdown(f":green[**{row['hadir'] or 0}**]")
-        cols[2].markdown(f":blue[**{row['terlambat'] or 0}**]")
-        cols[3].markdown(f":orange[**{row['sakit'] or 0}**]")
-        cols[4].markdown(f":violet[**{row['izin'] or 0}**]")
-        cols[5].markdown(f":red[**{row['alpa'] or 0}**]")
-        with cols[6]:
-            st.progress(percentage / 100, text=f"{percentage}%")
+            cols = st.columns([3, 1, 1, 1, 1, 1, 2])
+            cols[0].markdown(
+                f"**{row['nama_mahasiswa']}**  \n<span style='color:gray;font-size:0.85em'>{row['npm']}</span>",
+                unsafe_allow_html=True,
+            )
+            cols[1].markdown(status_badge("Hadir").replace("Hadir", str(row["hadir"] or 0)), unsafe_allow_html=True)
+            cols[2].markdown(status_badge("Terlambat").replace("Terlambat", str(row["terlambat"] or 0)), unsafe_allow_html=True)
+            cols[3].markdown(status_badge("Sakit").replace("Sakit", str(row["sakit"] or 0)), unsafe_allow_html=True)
+            cols[4].markdown(status_badge("Izin").replace("Izin", str(row["izin"] or 0)), unsafe_allow_html=True)
+            cols[5].markdown(status_badge("Alpa").replace("Alpa", str(row["alpa"] or 0)), unsafe_allow_html=True)
+            with cols[6]:
+                st.progress(percentage / 100, text=f"{percentage}%")
 
 
 def page_mahasiswa():
-    st.markdown("## 👥 Data Mahasiswa")
+    render_header("👥 Data Mahasiswa", "Kelola data mahasiswa per kelas — tambah, ubah, dan hapus langsung ke database.")
     id_dosen = current_dosen_id()
     courses = get_courses_by_dosen(id_dosen)
 
@@ -653,6 +867,8 @@ def page_mahasiswa():
 # Layout / navigation
 # --------------------------------------------------------------------------
 def main():
+    inject_css()
+
     if "page" not in st.session_state:
         st.session_state.page = "dashboard"
 
@@ -660,24 +876,34 @@ def main():
         page_login()
         return
 
+    user = st.session_state.user
     with st.sidebar:
-        st.markdown("### 🎓 SIAKAD V2")
-        st.caption(f"Login sebagai:\n\n**{st.session_state.user['nama_lengkap']}**")
-        st.divider()
+        st.markdown(
+            """<div class="sidebar-brand"><div class="logo">🎓</div>
+            <div class="title">SIAKAD V2</div></div>""",
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            f"""<div class="sidebar-user">
+                <div class="avatar">{initials(user['nama_lengkap'])}</div>
+                <div class="meta">
+                    <div class="name">{user['nama_lengkap']}</div>
+                    <div class="role">Dosen Pengampu</div>
+                </div>
+            </div>""",
+            unsafe_allow_html=True,
+        )
+        st.write("")
 
-        nav = {
-            "dashboard": "🏠 Dashboard",
-            "absensi": "📋 Input Absensi",
-            "mahasiswa": "👥 Mahasiswa",
-            "rekap": "📄 Rekap",
-        }
-        for key, label in nav.items():
-            if st.button(label, use_container_width=True, type="primary" if st.session_state.page == key else "secondary"):
+        for key, icon, label in NAV_ITEMS:
+            if st.button(f"{icon}  {label}", use_container_width=True,
+                         type="primary" if st.session_state.page == key else "secondary",
+                         key=f"nav_{key}"):
                 st.session_state.page = key
                 st.rerun()
 
         st.divider()
-        if st.button("🚪 Logout", use_container_width=True):
+        if st.button("🚪  Logout", use_container_width=True, key="nav_logout"):
             logout()
             st.rerun()
 
